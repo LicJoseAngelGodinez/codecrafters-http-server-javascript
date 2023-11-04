@@ -52,8 +52,8 @@ function parseRequest (request) {
         httpVersion
     }
 
-    for ( i = 1; i <= headerss.length-1; i++ ) {
-        const [header, value] = headerss[i].split(': ')
+    for ( i = 1; i <= headersSplit.length-1; i++ ) {
+        const [header, value] = headersSplit[i].split(': ')
         headers[`${camelCase(header)}`] = value;
     }
     return headers;
