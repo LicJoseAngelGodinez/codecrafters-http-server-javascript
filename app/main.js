@@ -9,6 +9,7 @@ const server = net.createServer((socket) => {
     socket.on("data", (data) => {
         const request = data.toString();
         const requestDetails = parseRequest(request);
+        console.log({requestDetails});
         if (requestDetails.path.startsWith('/echo/')) {
             const echoText = requestDetails.path.substring(6);
             writeResponse(socket, 200, echoText);
