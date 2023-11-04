@@ -22,7 +22,7 @@ const server = net.createServer((socket) => {
             console.log("Status 200 OK");
             socket.end();
             return;
-        } else if (method === "GET") {
+        } else if (method === "GET" && path.startsWith('/')) {
             const userAgentData = userAgent.slice(0, userAgent.length-9);
             socket.write("HTTP/1.1 200 OK\r\n");
             socket.write("Content-Type: text/plain\r\n");
