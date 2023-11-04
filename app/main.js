@@ -59,6 +59,14 @@ function parseRequest (request) {
     return headers;
 };
 
+function writeResponse(socket, code, body) {
+    socket.write(`HTTP/1.1 ${code} OK\r\n`);
+    socket.write('Content-Type: text/plain\r\n');
+    socket.write(`Content-Length: ${body.length}\r\n\r\n`);
+    socket.write(body);
+
+}
+
 // camelCase function credit to @apsillers 
 // https://stackoverflow.com/questions/10425287/convert-dash-separated-string-to-camelcase
 function camelCase(input) { 
