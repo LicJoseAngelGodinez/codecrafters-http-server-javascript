@@ -46,7 +46,7 @@ server.listen({
 function parseRequest (request) {
     const splitRemoveSpaces = request.split(/(\r\n|\n|\r)/gm).filter(line => line !== '' );
     const headersSplit = splitRemoveSpaces.map(header => header.replace("\r\n", '')).filter(element => element !== '');
-    const [ method, path, httpVersion ] = headersSplit[0];
+    const [ method, path, httpVersion ] = headersSplit[0].split(' ');
     const headers = {
         method,
         path,
