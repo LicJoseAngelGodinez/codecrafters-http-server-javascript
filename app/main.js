@@ -13,7 +13,7 @@ const server = net.createServer((socket) => {
             const echoText = requestDetails.path.substring(6);
             writeResponse(socket, 200, echoText);
         } else if (requestDetails.path === '/user-agent') {
-            writeResponse(socket, 200, requestDetails.headers['userAgent']);
+            writeResponse(socket, 200, requestDetails['userAgent']);
         } else if (requestDetails.path === '/') {
             writeResponse(socket, 200, 'OK');
         } else {
