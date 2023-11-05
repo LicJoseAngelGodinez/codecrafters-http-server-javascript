@@ -1,25 +1,25 @@
 const net = require("net");
+const server = net.createServer();
 
 // You can use print statements as follows for debugging, they'll be visible when running tests.
 console.log("Logs from your program will appear here!");
 
 // Uncomment this to pass the first stage
-const server = net.createServer((socket) => {
-
+server.on('connection', (socket) => {
     socket.on("data", (data) => {
         const request = data.toString();
-        const requestDetails = parseRequest(request);
-        console.log({requestDetails});
-        if (requestDetails.path.startsWith('/echo/')) {
-            const echoText = requestDetails.path.substring(6);
-            writeResponse(socket, 200, echoText);
-        } else if (requestDetails.path === '/user-agent') {
-            writeResponse(socket, 200, requestDetails['userAgent']);
-        } else if (requestDetails.path === '/') {
-            writeResponse(socket, 200, 'OK');
-        } else {
-            writeResponse(socket, 404, 'Not Found');
+        const { method, path, headers } = parseRequest(request);
+        let code = 200;
+        let body = 'OK';
+        if (path.startsWith('/echo/')) {
+            body = path.substring(6);
+        } else if (path === '/user-agent') {
+            body = headers['userAgent'];
+        } else if ( path !== '/') {
+            code = 404;
+            body = 'Not Found';
         }
+        writeResponse(socket, code, body);
         socket.end();
         socket.end();
   });
@@ -47,17 +47,18 @@ function parseRequest (request) {
     const splitRemoveSpaces = request.split(/(\r\n|\n|\r)/gm).filter(line => line !== '' );
     const headersSplit = splitRemoveSpaces.map(header => header.replace("\r\n", '')).filter(element => element !== '');
     const [ method, path, httpVersion ] = headersSplit[0].split(' ');
-    const headers = {
-        method,
-        path,
-        httpVersion
-    }
+    const headers = {}
 
     for ( i = 1; i <= headersSplit.length-1; i++ ) {
         const [header, value] = headersSplit[i].split(': ')
         headers[`${camelCase(header)}`] = value;
     }
-    return headers;
+    return {
+        method,
+        path,
+        httpVersion,
+        headers,
+    };
 };
 
 function writeResponse(socket, code, body) {
