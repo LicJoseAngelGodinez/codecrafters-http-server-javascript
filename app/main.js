@@ -1,5 +1,10 @@
 const net = require("net");
+const fs = require("fs");
+const pathModule = require("path");
+
 const server = net.createServer();
+const args = process.argv.slice(2);
+const directory = args[0] === '--directory' ? args[1] : __dirname;
 
 // You can use print statements as follows for debugging, they'll be visible when running tests.
 console.log("Logs from your program will appear here!");
@@ -7,19 +12,36 @@ console.log("Logs from your program will appear here!");
 // Uncomment this to pass the first stage
 server.on('connection', (socket) => {
     socket.on("data", (data) => {
+
         const request = data.toString();
+
         const { method, path, headers } = parseRequest(request);
+
         let code = 200;
         let body = 'OK';
+        let contentType = 'text/plain';
+
         if (path.startsWith('/echo/')) {
             body = path.substring(6);
         } else if (path === '/user-agent') {
             body = headers['userAgent'];
-        } else if ( path !== '/') {
+        } else if (path.startsWith('/files/')) {
+
+            const filePath = pathModule.join(directory, path.substring(7));
+
+            try {
+                body = fs.readFileSync(filePath);
+                contentType = 'application/octet-stream';
+            } catch (e) {
+                code = 404;
+                body = 'Not Found';
+            }
+
+        } else if ( path !== '/') {            
             code = 404;
             body = 'Not Found';
         }
-        writeResponse(socket, code, body);
+        writeResponse(socket, code, contentType, body);
         socket.end();
         socket.end();
   });
@@ -61,9 +83,9 @@ function parseRequest (request) {
     };
 };
 
-function writeResponse(socket, code, body) {
+function writeResponse(socket, code, contentType, body) {
     socket.write(`HTTP/1.1 ${code} OK\r\n`);
-    socket.write('Content-Type: text/plain\r\n');
+    socket.write(`Content-Type: ${contentType}\r\n`);
     socket.write(`Content-Length: ${body.length}\r\n\r\n`);
     socket.write(body);
 
