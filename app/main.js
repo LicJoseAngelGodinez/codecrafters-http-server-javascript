@@ -21,11 +21,7 @@ server.on('connection', (socket) => {
         let body = 'OK';
         let contentType = 'text/plain';
 
-        if (path.startsWith('/echo/')) {
-            body = path.substring(6);
-        } else if (path === '/user-agent') {
-            body = headers['userAgent'];
-        } else if (method === 'POST' && path.startsWith('/files/')) {
+        if (method === 'POST' && path.startsWith('/files/')) {
 
             const filePath = pathModule.join(directory, path.substring(7));
 
@@ -37,6 +33,22 @@ server.on('connection', (socket) => {
             } catch (error) {
                 code = 500;
                 body = 'Internal Server Error';
+            }
+
+        } else if (path.startsWith('/echo/')) {
+            body = path.substring(6);
+        } else if (path === '/user-agent') {
+            body = headers['userAgent'];
+        } else if (path.startsWith('/files/')) {
+
+            const filePath = pathModule.join(directory, path.substring(7));
+
+            try {
+                body = fs.readFileSync(filePath);
+                contentType = 'application/octet-stream';
+            } catch (e) {
+                code = 404;
+                body = 'Not Found';
             }
 
         } else if ( path !== '/') {            
