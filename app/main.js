@@ -25,16 +25,18 @@ server.on('connection', (socket) => {
             body = path.substring(6);
         } else if (path === '/user-agent') {
             body = headers['userAgent'];
-        } else if (path.startsWith('/files/')) {
+        } else if (method === 'POST' && path.startsWith('/files/')) {
 
             const filePath = pathModule.join(directory, path.substring(7));
 
             try {
-                body = fs.readFileSync(filePath);
-                contentType = 'application/octet-stream';
-            } catch (e) {
-                code = 404;
-                body = 'Not Found';
+                const fileContent = request.split('\r\n\r\n')[1];
+                fs.writeFileSync(filePath, fileContent);
+                code = 201;
+                body = 'Created';
+            } catch (error) {
+                code = 500;
+                body = 'Internal Server Error';
             }
 
         } else if ( path !== '/') {            
